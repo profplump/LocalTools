@@ -1,0 +1,30 @@
+#!/bin/bash
+
+DOMAIN="uberzach.com"
+PATH="${PATH}:/Users/profplump/bin/cron/f5"
+export PATH
+
+function isUp {
+	UP=0
+	if ps auwx | grep -v grep | grep 'ssh_mux' | grep -q "${1}-config${2}_"; then
+		UP=1
+	fi
+	if ps auwx | grep -v grep | grep -q "ssh -T -n config${2}.${1}"; then
+		UP=1
+	fi
+}
+
+function setUp {
+	if grep -q "Host config${2}.${1}" ~/.ssh/config; then
+		isUp "${1}" "${2}"
+		if [ $UP -lt 1 ]; then
+			ssh -T -n "config${2}.${1}"
+		fi
+	fi
+}
+
+# Check the primary and secondary
+setUp 'uberzach.com' ''
+
+# Exit cleanly
+exit 0

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Parameters
+baseDir="/Users/Shared/EncodeQueue"
+inDir="${baseDir}/in"
+greyName="Grey"
+
+# Find folders we might care about
+DIRS="`find "${inDir}" -type d -mindepth 1 -maxdepth 1 -not -name "${greyName}"`"
+
+# For each likely directory
+IFS=$'\n'
+for DIR in ${DIRS}; do
+	DIRNAME="`basename "${DIR}"`"
+
+	# Find likely MKV files
+	FILES="`find "${DIR}" -type f -maxdepth 1 -mtime +15m -name '*.mkv'`"
+
+	# For each file
+	for FILE in ${FILES}; do
+		NAME="`basename "${FILE}"`"
+		NAME_OUT="`echo "${NAME}" | sed "s%^title%${DIRNAME}_%"`"
+		mv "${FILE}" "${inDir}/${NAME_OUT}"
+	done
+done
+
+# Clean empty folders
+find "${inDir}" -type f -name '.DS_Store' -delete
+find "${inDir}" -type d -mindepth 1 -maxdepth 1 -not -name "${greyName}" -empty -delete

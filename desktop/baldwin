@@ -1,0 +1,19 @@
+#!/bin/sh
+
+DOMAIN="uberzach.com"
+HOST="`basename "${0}"`"
+
+# Make SFTP adjustments if requested
+SFTP=0
+SFTP_HOST="`echo "${HOST}" | sed 's%-sftp$%%'`"
+if [ "${HOST}" != "${SFTP_HOST}" ]; then
+	HOST="${SFTP_HOST}"
+	SFTP=1
+fi
+
+FQ_HOST="${HOST}.${DOMAIN}"
+if [ $SFTP -gt 0 ] ; then
+	exec sftp -oControlMaster=no "${FQ_HOST}" ${@}
+else
+	exec ssh -tt "${FQ_HOST}" ${@}
+fi

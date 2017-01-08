@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Parameters
+baseDir="/Users/Shared/EncodeQueue"
+inDir="${baseDir}/in"
+outDir="${baseDir}/out"
+storeDir="${baseDir}/store"
+
+# Bail if we're already running
+me="`basename "${0}"`"
+if [ `ps auwx | grep -v grep | grep "${me}" | wc -l` -gt 2 ]; then
+	exit 0
+fi
+
+# Bail if the server is not mounted
+if ! ~/bin/video/isMediaMounted; then
+	exit 0
+fi
+
+# Ensure the output directory exists
+if [ ! -d "${storeDir}" ]; then
+	echo "`basename "${0}"`: Storage directory does not exist: ${storeDir}" 1>&2
+	exit 1
+fi
+
+# Move encoded files to the storage directory
+find "${outDir}" -type f -name '*.m[k4]v' -mtime +15m -print0 | \
+	xargs -0 -I REPSTR mv REPSTR "${storeDir}"
+
+# Move pending files to the input directory
+find "${storeDir}/in" -type f -mtime +15m -print0 | \
+	xargs -0 -I REPSTR mv REPSTR "${inDir}"

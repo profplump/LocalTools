@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DOMAIN="uberzach.com"
+HOST="`basename "${0}" | sed 's%^spy-%%'`"
+JUMP_HOST="baldwin.${DOMAIN}"
+
+# Make tunnel adjustments if requested
+TUNNEL=0
+TUNNEL_HOST="`echo "${HOST}" | sed 's%-tunnel$%%'`"
+if [ "${HOST}" != "${TUNNEL_HOST}" ]; then
+	HOST="${TUNNEL_HOST}"
+	TUNNEL=1
+fi
+
+FQ_HOST="${HOST}.${DOMAIN}"
+if [ $TUNNEL -gt 0 ] ; then
+	ssh "${JUMP_HOST}" "ssh '${FQ_HOST}' 'sox -q -d -t mp3 -C 96 - remix -'" | play -t mp3 -
+else
+	ssh "${FQ_HOST}" 'sox -q -d -t mp3 -C 96 - remix - ' | play -t mp3 -
+fi
